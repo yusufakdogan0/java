@@ -1,0 +1,45 @@
+static long combine(long x, long y){
+        return Math.max(x,y);
+    }
+    static void build(int l, int r, long[] segmentTree, long[] numbers, int node){
+        if (l==r){
+            segmentTree[node] = numbers[l];
+            return;
+        }
+        int mid = (l+r)/2;
+        build(l,mid,segmentTree,numbers,2*node);
+        build(mid + 1,r,segmentTree,numbers,2*node+1);
+        segmentTree[node] = combine(segmentTree[2*node],segmentTree[2*node+1]);
+    }
+    static void update(int l, int r, long[] segmentTree, long[] numbers, int node, int target, int value){
+        if (l==r){
+            segmentTree[node] += value;
+            numbers[l] += value;
+            return;
+        }
+        int mid = (l+r)/2;
+        if (target <= mid){
+            update(l,mid,segmentTree,numbers,2*node,target,value);
+        }
+        else {
+            update(mid + 1,r,segmentTree,numbers,2*node+1,target,value);
+        }
+        segmentTree[node] = combine(segmentTree[2*node],segmentTree[2*node+1]);
+    }
+    static long query(int l, int r, int targetL, int targetR, long[] segmentTree, int node){
+        if (l==targetL && r==targetR){
+            return segmentTree[node];
+        }
+        int mid = (l+r)/2;
+        if (targetL >= mid+1){// Go right
+            return query(mid+1,r,targetL,targetR,segmentTree,2*node+1);
+        }
+        else if(targetR <= mid){ // Go left
+            return query(l,mid,targetL,targetR,segmentTree,2*node);
+        }
+        else {
+            long ansleft = query( l, mid, targetL, mid,segmentTree,2*node);
+            long ansRight = query( mid+1, r, mid+1, targetR,segmentTree,2*node+1);
+            return combine(ansleft, ansRight);
+        }
+    }
